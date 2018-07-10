@@ -5,7 +5,7 @@ const VideoController = require('../controllers/VideoController')
 /* GET users listing. */
 router.get('/', function(req, res, next) {
   VideoController.handleUploadToS3()
-  res.send('Video');
+  res.end('Video');
 });
 
 module.exports = router;
