@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const VideoRoute = require('./routes/video')
+const VideoRoute = require('./routes/VideoRoute')
 
 /* GET home page. */
 router.use('/video', VideoRoute);

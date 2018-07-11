@@ -2,29 +2,28 @@ const fs = require('fs')
 const AWS = require('aws-sdk')
 const s3 = new AWS.S3()
 const clientEncoder = require('zencoder')('fecbaa90d94d27af5d319d20165b8447')
+const bucketName = 'sbtfullstack'
 
-const handleProgress = (job) => {
-  clientEncoder.Job.progress(job.id, async (err, data) => {
-    await setTimeout(() => console.log(data), 3000)
+const handleMoveEncodedToS3 = (job) => {
+  clientEncoder.Job.details(job.id, async (err, data) => {
+    const outputData = data.job.output_media_files
+    console.log('Detalhes do job OK')
   })
 }
 
 const handleEncode = (filename) => {
-  clientEncoder.Job.create({input: `https://s3-sa-east-1.amazonaws.com/sbtfullstack/${filename}`}, function(err, data) {
+  clientEncoder.Job.create({input: `https://s3-sa-east-1.amazonaws.com/${bucketName}/${filename}`}, function(err, data) {
     if (err) {
       console.log(err)
-      return
     }else{
-      handleProgress(data)
+      handleMoveEncodedToS3(data)
     }
   });
 }
 
 module.exports = {
-  handleUploadToS3(){
-    const bucketName = 'sbtfullstack'
-
-    fs.readFile('./videoteste.mp4', (err, data) => {
+  handleUploadToS3(videofile){
+    fs.readFile(videofile, (err, data) => {
       if (err) {
         throw err;
       }
@@ -34,23 +33,21 @@ module.exports = {
         Key: 'VideoTeste.mp4'
       }
 
-      s3.putObject(params, function (err) {
+      s3.putObject(params, (err) => {
         if (err) {
           console.log(err)
         } else {
-          console.log("Dados enviados com sucesso para sbtfullstack/frontend")
-
           const aclParams = {
             ACL: 'public-read',
             Bucket: bucketName,
             Key: 'VideoTeste.mp4'
           }
 
-          s3.putObjectAcl(aclParams, function (err, data) {
+          s3.putObjectAcl(aclParams, (err, data) => {
             if (err) {
               console.log(err)
             } else {
-              handleEncode(params.Key)
+              //handleEncode(params.Key) TODO IMPLEMENTAR ENCODE DOS VÍDEOS
             }
           })
         }
