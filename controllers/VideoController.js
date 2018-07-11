@@ -1,8 +1,11 @@
 const fs = require('fs')
 const AWS = require('aws-sdk')
 const s3 = new AWS.S3()
+const multer  = require('multer')
+const multerS3 = require('multer-s3')
+
 const clientEncoder = require('zencoder')('fecbaa90d94d27af5d319d20165b8447')
-const bucketName = 'sbtfullstack'
+const bucket = 'sbtfullstack'
 
 const handleMoveEncodedToS3 = (job) => {
   clientEncoder.Job.details(job.id, async (err, data) => {
@@ -12,7 +15,7 @@ const handleMoveEncodedToS3 = (job) => {
 }
 
 const handleEncode = (filename) => {
-  clientEncoder.Job.create({input: `https://s3-sa-east-1.amazonaws.com/${bucketName}/${filename}`}, function(err, data) {
+  clientEncoder.Job.create({input: `https://s3-sa-east-1.amazonaws.com/${bucket}/${filename}`}, function(err, data) {
     if (err) {
       console.log(err)
     }else{
@@ -22,40 +25,18 @@ const handleEncode = (filename) => {
 }
 
 module.exports = {
-  handleUploadToS3(videofile){
-    const filename = `${videofile.filename}.mp4`
-
-    fs.readFile(videofile.path, (err, data) => {
-      if (err) {
-        throw err;
-      }
-
-      const params = {
-        Body: data,
-        Bucket: bucketName,
-        Key: filename
-      }
-
-      s3.putObject(params, (err) => {
-        if (err) {
-          console.log(err)
-        } else {
-          const aclParams = {
-            ACL: 'public-read',
-            Bucket: bucketName,
-            Key: filename
-          }
-
-          s3.putObjectAcl(aclParams, (err, data) => {
-            if (err) {
-              console.log(err)
-            } else {
-              console.log('Video enviado com sucesso')
-              //handleEncode(params.Key) TODO IMPLEMENTAR ENCODE DOS VÍDEOS
-            }
-          })
+  handleUploadToS3(){
+    return multer({
+      storage: multerS3({
+        s3,
+        bucket,
+        metadata: function (req, file, cb) {
+          cb(null, { fieldName: file.fieldname });
+        },
+        key: function (req, file, cb) {
+          cb(null, `${Date.now().toString()}.mp4`)
         }
       })
-    })
+    }).single('video')
   }
 }
