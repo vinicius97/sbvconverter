@@ -4,6 +4,7 @@ const s3 = new AWS.S3()
 const multer  = require('multer')
 const multerS3 = require('multer-s3')
 
+const VideoModel = require('../models/VideoModel')
 const clientEncoder = require('zencoder')('fecbaa90d94d27af5d319d20165b8447')
 const bucket = 'sbtfullstack'
 
@@ -24,17 +25,38 @@ const handleEncode = (filename) => {
   });
 }
 
+const createVideo = async (params) => {
+  let Video = new VideoModel(params);
+  return await Video.save(function (err) {
+    if (err) {
+      console.log(err)
+    }
+  });
+}
+
 module.exports = {
-  handleUploadToS3(){
+  getVideos: () => {
+    return VideoModel.find({}, (err, videos) => videos)
+  },
+  handleUploadToS3: () => {
+    const filename = `${Date.now().toString()}.mp4`
+
+    createVideo({
+      title   : filename,
+      url     : 'http://youtube.com',
+      status  : 'Finalizado'
+    })
+
     return multer({
       storage: multerS3({
         s3,
         bucket,
-        metadata: function (req, file, cb) {
-          cb(null, { fieldName: file.fieldname });
+        acl: 'public-read',
+        metadata: function (req, file, next) {
+          next(null, { fieldName: file.fieldname });
         },
-        key: function (req, file, cb) {
-          cb(null, `${Date.now().toString()}.mp4`)
+        key: function (req, file, next) {
+          next(null, filename)
         }
       })
     }).single('video')
