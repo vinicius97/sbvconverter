@@ -23,14 +23,17 @@ const handleEncode = (filename) => {
 
 module.exports = {
   handleUploadToS3(videofile){
-    fs.readFile(videofile, (err, data) => {
+    const filename = `${videofile.filename}.mp4`
+
+    fs.readFile(videofile.path, (err, data) => {
       if (err) {
         throw err;
       }
+
       const params = {
         Body: data,
         Bucket: bucketName,
-        Key: 'VideoTeste.mp4'
+        Key: filename
       }
 
       s3.putObject(params, (err) => {
@@ -40,13 +43,14 @@ module.exports = {
           const aclParams = {
             ACL: 'public-read',
             Bucket: bucketName,
-            Key: 'VideoTeste.mp4'
+            Key: filename
           }
 
           s3.putObjectAcl(aclParams, (err, data) => {
             if (err) {
               console.log(err)
             } else {
+              console.log('Video enviado com sucesso')
               //handleEncode(params.Key) TODO IMPLEMENTAR ENCODE DOS VÍDEOS
             }
           })
