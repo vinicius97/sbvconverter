@@ -25,7 +25,7 @@ const handleEncode = (filename) => {
 }
 
 module.exports = {
-  handleUploadToS3(){
+  handleUpload(){
     return multer({
       storage: multerS3({
         s3,
