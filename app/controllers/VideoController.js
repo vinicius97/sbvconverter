@@ -38,7 +38,7 @@ module.exports = {
   getVideos: () => {
     return VideoModel.find({}, (err, videos) => videos)
   },
-  handleUploadToS3: () => {
+  handleUpload(){
     const filename = `${Date.now().toString()}.mp4`
 
     createVideo({
