@@ -12,6 +12,10 @@ module.exports = () => {
     res.end()
   })
 
+  router.post('/notification', (req, res, next) => {
+    res.end()
+  })
+
   router.post('/upload', VideoController.handleUpload(), async (req, res, next) => {
     res.send(req.file)
   })

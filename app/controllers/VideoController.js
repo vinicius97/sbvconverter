@@ -4,7 +4,7 @@ const multer  = require('multer')
 const multerS3 = require('multer-s3')
 
 const VideoModel = require('../models/VideoModel')
-const clientEncoder = require('zencoder')('fecbaa90d94d27af5d319d20165b8447')
+const { createJob } = require('../services/ZencoderService')
 
 const createVideo = async (params) => {
   let Video = new VideoModel(params);
@@ -42,13 +42,9 @@ module.exports = {
     }).single('video')
   },
   async handleEncode({bucket, key}) {
-    await clientEncoder.Job.create({input: `https://s3-sa-east-1.amazonaws.com/${bucket}/${key}`}, (err, data) => {
-      if (err) {
-        console.log(err)
-        return null
-      }else{
-        return data
-      }
-    });
+    const input = `https://s3-sa-east-1.amazonaws.com/${bucket}/${key}`
+    const jobResult = await createJob({input, bucket, key})
+    console.log(jobResult.data)
+    return jobResult.data
   }
 }
