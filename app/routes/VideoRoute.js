@@ -2,16 +2,25 @@ const express = require('express')
 const VideoController = require('../controllers/VideoController')
 const router = express.Router()
 
-router.get('/list', async (req, res, next) => {
-  res.send(await VideoController.getVideos())
-})
+module.exports = () => {
 
-router.get('/video', (req, res, next) => {
-  res.end()
-})
+  router.get('/list', async (req, res, next) => {
+    res.send(await VideoController.getVideos())
+  })
 
-router.post('/upload', VideoController.handleUploadToS3(), (req, res, next) => {
-  res.send('Encodando')
-})
+  router.get('/:id', (req, res, next) => {
+    res.end()
+  })
 
-module.exports = router;
+  router.post('/upload', VideoController.handleUpload(), async (req, res, next) => {
+    res.send(req.file)
+  })
+
+  router.post('/encode', async (req, res, next) => {
+    const { bucket, key } = req.body
+    const encodedFile = await VideoController.handleEncode({ bucket, key })
+    res.send(encodedFile)
+  })
+
+  return router
+}

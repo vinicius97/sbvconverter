@@ -1,4 +1,3 @@
-const fs = require('fs')
 const AWS = require('aws-sdk')
 const s3 = new AWS.S3()
 const multer  = require('multer')
@@ -6,28 +5,10 @@ const multerS3 = require('multer-s3')
 
 const VideoModel = require('../models/VideoModel')
 const clientEncoder = require('zencoder')('fecbaa90d94d27af5d319d20165b8447')
-const bucket = 'sbtfullstack'
-
-const handleMoveEncodedToS3 = (job) => {
-  clientEncoder.Job.details(job.id, async (err, data) => {
-    const outputData = data.job.output_media_files
-    console.log('Detalhes do job OK')
-  })
-}
-
-const handleEncode = (filename) => {
-  clientEncoder.Job.create({input: `https://s3-sa-east-1.amazonaws.com/${bucket}/${filename}`}, function(err, data) {
-    if (err) {
-      console.log(err)
-    }else{
-      handleMoveEncodedToS3(data)
-    }
-  });
-}
 
 const createVideo = async (params) => {
   let Video = new VideoModel(params);
-  return await Video.save(function (err) {
+  return await Video.save((err) => {
     if (err) {
       console.log(err)
     }
@@ -35,30 +16,39 @@ const createVideo = async (params) => {
 }
 
 module.exports = {
-  getVideos: () => {
+  getVideos() {
     return VideoModel.find({}, (err, videos) => videos)
   },
-  handleUpload(){
+  handleUpload() {
     const filename = `${Date.now().toString()}.mp4`
 
     createVideo({
       title   : filename,
-      url     : 'http://youtube.com',
-      status  : 'Finalizado'
+      url     : '',
+      status  : ''
     })
 
     return multer({
       storage: multerS3({
         s3,
-        bucket,
-        acl: 'public-read',
-        metadata: function (req, file, next) {
-          next(null, { fieldName: file.fieldname });
+        bucket: 'sbtfullstack',
+        metadata: (req, file, cb) => {
+          cb(null, { fieldName: filename });
         },
-        key: function (req, file, next) {
-          next(null, filename)
+        key: (req, file, cb) => {
+          cb(null, filename)
         }
       })
     }).single('video')
+  },
+  async handleEncode({bucket, key}) {
+    await clientEncoder.Job.create({input: `https://s3-sa-east-1.amazonaws.com/${bucket}/${key}`}, (err, data) => {
+      if (err) {
+        console.log(err)
+        return null
+      }else{
+        return data
+      }
+    });
   }
 }
