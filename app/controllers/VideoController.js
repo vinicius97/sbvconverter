@@ -6,36 +6,38 @@ const multerS3 = require('multer-s3')
 const VideoModel = require('../models/VideoModel')
 const { createJob } = require('../services/ZencoderService')
 
-const create = async (params) => {
-  let Video = new VideoModel(params)
-  return await Video.save((err) => {
-    if (err) {
-      console.log(err)
-    }
-  })
-}
-
-const update = async (filename, params) => {
-  /*VideoModel.findOneAndUpdate({filename}, {...params}, {new: true}, (err, video) => {
-    if(err)
-      console.log(err)
-  })*/
-}
-
-
 module.exports = {
+  async create(title, file) {
+
+    let params = {
+      title   : title,
+      filename: file.key,
+      url     : '',
+      input   : file.location,
+      status  : ''
+    }
+
+    let video = new VideoModel(params)
+    return await video.save((err) => {
+      if (err) {
+        console.log('Erro ao salvar parametros do vídeo', err)
+      }
+    })
+  },
+  async update(params) {
+    VideoModel.findOneAndUpdate({filename: params.filename}, params, {new: true}, (err) => {
+      if(err){
+        console.log(err)
+      }else{
+        console.log('Atualizado com sucesso')
+      }
+    })
+  },
   getVideos() {
     return VideoModel.find({}, (err, videos) => videos)
   },
   handleUpload() {
     const filename = `${Date.now().toString()}.mp4`
-
-    create({
-      title   : filename,
-      filename: filename,
-      url     : '',
-      status  : ''
-    })
 
     return multer({
       storage: multerS3({
