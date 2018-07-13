@@ -1,8 +1,8 @@
 const express = require('express')
 const router = express.Router()
-const VideoRoute = require('./routes/VideoRoute')()
+const VideoRoute = require('./routes/VideoRoute')
 
-module.exports = () => {
+module.exports = (io) => {
 
   router.use(function (req, res, next) {
     res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3001');
@@ -10,10 +10,16 @@ module.exports = () => {
     res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
     res.setHeader('Access-Control-Allow-Credentials', true);
 
+    io.on('connection', function (client){
+
+      console.log('conexão bem sucedida')
+
+    });
+
     next();
   });
 
-  router.use('/video', VideoRoute);
+  router.use('/video', VideoRoute(io));
 
   return router
 }

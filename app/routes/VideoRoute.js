@@ -2,7 +2,7 @@ const express = require('express')
 const VideoController = require('../controllers/VideoController')
 const router = express.Router()
 
-module.exports = () => {
+module.exports = (io) => {
 
   router.get('/list', async (req, res, next) => {
     res.send(await VideoController.getVideos())
@@ -12,18 +12,27 @@ module.exports = () => {
     res.end()
   })
 
-  router.post('/notification', (req, res, next) => {
+  router.post('/job/callback', (req, res, next) => {
+    io.emit('upload status', 'Finalizado')
     res.end()
   })
 
-  router.post('/upload', VideoController.handleUpload(), async (req, res, next) => {
-    res.send(req.file)
+  router.post('/upload', VideoController.handleUpload(), (req, res, next) => {
+    res.end()
   })
 
   router.post('/encode', async (req, res, next) => {
-    const { bucket, key } = req.body
-    const encodedFile = await VideoController.handleEncode({ bucket, key })
-    res.send(encodedFile)
+    try{
+
+      io.emit('upload status', 'Encodando')
+      const { bucket, key } = req.body
+      await VideoController.handleEncode({ bucket, key })
+
+    }catch (e) {
+      io.emit('upload status', 'Falha')
+    }finally {
+      res.end()
+    }
   })
 
   return router
