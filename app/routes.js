@@ -11,10 +11,13 @@ module.exports = (io) => {
     res.setHeader('Access-Control-Allow-Credentials', true);
 
     io.on('connection', function (client){
-
       console.log('conexão bem sucedida')
-
     });
+
+    io.on("error", (err) => {
+      console.log("Caught flash policy server socket error: ")
+      console.log(err.stack)
+    })
 
     next();
   });

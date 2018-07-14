@@ -1,5 +1,5 @@
 const AWS = require('aws-sdk')
-const s3 = new AWS.S3()
+const s3 = new AWS.S3({signatureVersion: 'v2'})
 const multer  = require('multer')
 const multerS3 = require('multer-s3')
 
@@ -8,30 +8,45 @@ const { createJob } = require('../services/ZencoderService')
 
 module.exports = {
   async create(title, file) {
+    try{
+      let params = {
+        bucket  : file.bucket,
+        title   : title,
+        filename: title + file.key,
+        key     : file.key,
+        url     : '',
+        input   : file.location,
+        status  : ''
+      }
 
-    let params = {
-      title   : title,
-      filename: file.key,
-      url     : '',
-      input   : file.location,
-      status  : ''
+      let video = new VideoModel(params)
+      let videoObject = video
+      await video.save((err) => {
+        if (err) {
+          console.log('Erro ao salvar parametros do vídeo', err)
+          videoObject = null
+        }
+      })
+
+      return videoObject
+
+    }catch (e) {
+      return null
     }
 
-    let video = new VideoModel(params)
-    return await video.save((err) => {
-      if (err) {
-        console.log('Erro ao salvar parametros do vídeo', err)
-      }
-    })
   },
-  async update(params) {
-    VideoModel.findOneAndUpdate({filename: params.filename}, params, {new: true}, (err, object) => {
-      if(err){
-        console.log(err)
-      }else{
-        console.log('Atualizado com sucesso', object)
+  async update(id, params) {
+    VideoModel.findByIdAndUpdate(
+      id,
+      params,
+      {new: true},
+      (err, videoObject) => {
+        // Handle any possible database errors
+        if (err){
+          return res.status(500).send(err);
+        }
       }
-    })
+    )
   },
 
   async getVideoObject(query = {}) {
@@ -44,22 +59,27 @@ module.exports = {
   },
 
   handleUpload() {
-    const filename = `${Date.now().toString()}.mp4`
+    try{
+      const filename = `${Date.now().toString()}.mp4`
 
-    return multer({
-      storage: multerS3({
-        s3,
-        bucket: 'sbtfullstack',
-        metadata: (req, file, cb) => {
-          cb(null, { fieldName: filename });
-        },
-        key: (req, file, cb) => {
-          cb(null, filename)
-        }
-      })
-    }).single('video')
+      return multer({
+        storage: multerS3({
+          s3,
+          bucket: 'sbtfullstack',
+          metadata: (req, file, cb) => {
+            cb(null, { fieldName: filename });
+          },
+          key: (req, file, cb) => {
+            cb(null, filename)
+          }
+        })
+      }).single('video')
+    }catch (e){
+      console.log(e)
+      return null
+    }
   },
-  async handleEncode({bucket, key}) {
+  async handleEncode({ bucket, key }) {
     const input = `https://s3-sa-east-1.amazonaws.com/${bucket}/${key}`
     const jobResult = await createJob({input, bucket, key})
 
