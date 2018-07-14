@@ -12,6 +12,7 @@ module.exports = {
         {
           label: 'web',
           url: `s3://${bucket}/processed_${key}`,
+          public: true,
           notifications: [
             //TODO Quando estiver em produção adicionar url do hook que irá receber os eventos
           ]

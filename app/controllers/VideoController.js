@@ -25,17 +25,24 @@ module.exports = {
     })
   },
   async update(params) {
-    VideoModel.findOneAndUpdate({filename: params.filename}, params, {new: true}, (err) => {
+    VideoModel.findOneAndUpdate({filename: params.filename}, params, {new: true}, (err, object) => {
       if(err){
         console.log(err)
       }else{
-        console.log('Atualizado com sucesso')
+        console.log('Atualizado com sucesso', object)
       }
     })
   },
-  getVideos() {
-    return VideoModel.find({}, (err, videos) => videos)
+
+  async getVideoObject(query = {}) {
+    try{
+      return await VideoModel.find(query, (err, videos) => videos)
+    }catch (e) {
+      console.log(e)
+      return null
+    }
   },
+
   handleUpload() {
     const filename = `${Date.now().toString()}.mp4`
 

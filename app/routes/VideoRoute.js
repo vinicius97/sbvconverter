@@ -5,11 +5,11 @@ const router = express.Router()
 module.exports = (io) => {
 
   router.get('/list', async (req, res, next) => {
-    res.send(await VideoController.getVideos())
+    res.send(await VideoController.getVideoObject())
   })
 
-  router.get('/:id', (req, res, next) => {
-    res.end()
+  router.get('/:id', async (req, res, next) => {
+    res.send(await VideoController.getVideoObject({_id: req.params.id}))
   })
 
   router.post('/job/callback', (req, res, next) => {
@@ -30,8 +30,6 @@ module.exports = (io) => {
       io.emit('upload status', 'Encodando')
       const { bucket, key } = req.body
       const encodeResult = await VideoController.handleEncode({ bucket, key })
-
-      console.log(encodeResult)
 
       let newParams = {
         encode_id : encodeResult.id,
