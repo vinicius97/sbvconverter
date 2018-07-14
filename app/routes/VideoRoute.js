@@ -17,18 +17,32 @@ module.exports = (io) => {
     res.end()
   })
 
-  router.post('/upload', VideoController.handleUpload(), (req, res, next) => {
-    const title = req.body.title
-    const file = req.file
-    VideoController.create(title, file)
-    res.send(file)
+  router.post('/upload', (req, res, next) => {
+    res.setTimeout(24 * 60 * 60000, function(){ // Timeout 1 dia para requisições de uploads
+      console.log('Request has timed out.');
+      res.send(408);
+    });
+    next()
+  },
+  VideoController.handleUpload(),
+  async (req, res, next) => {
+    try{
+      const title = req.body.title
+      const file = req.file
+
+      const videoObject = await VideoController.create(title, file)
+      res.send(videoObject)
+    }catch (e) {
+      console.log(e)
+      res.end()
+    }
   })
 
   router.post('/encode', async (req, res, next) => {
     try{
 
       io.emit('upload status', 'Encodando')
-      const { bucket, key } = req.body
+      const { _id, bucket, key } = req.body
       const encodeResult = await VideoController.handleEncode({ bucket, key })
 
       let newParams = {
@@ -38,9 +52,11 @@ module.exports = (io) => {
         status    : 'Encodando'
       }
 
-      VideoController.update(newParams)
+      VideoController.update(_id, newParams)
 
     }catch (e) {
+      console.log('Erro ao tentar encodar')
+      console.log(e)
       io.emit('upload status', 'Falha')
     }finally {
       res.end()
