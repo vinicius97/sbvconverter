@@ -13,7 +13,7 @@ module.exports = (io) => {
   })
 
   router.post('/job/callback', (req, res, next) => {
-    const { url } = req.body.job.output
+    const { url } = req.body.output
     const key = url.split('_')[1]
     io.emit('upload status '+key, 'Finalizado')
 
