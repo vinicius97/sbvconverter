@@ -1,6 +1,7 @@
 const AWS = require('aws-sdk')
 const awsCredentials = require('../../config.json').aws
-AWS.config.loadFromPath(awsCredentials)
+AWS.config.accessKeyId = awsCredentials.accessKeyId
+AWS.config.secretAccessKey = awsCredentials.secretAccessKey
 
 const s3 = new AWS.S3({signatureVersion: 'v2'})
 const multer  = require('multer')
