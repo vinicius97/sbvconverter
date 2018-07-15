@@ -3,8 +3,9 @@ const app = express()
 const cookieParser = require('cookie-parser')
 const mongoose = require('mongoose')
 const routes = require('./app/routes')
+const config = require('./config.json')
 
-mongoose.connect('mongodb://admin:00admin@ds141320.mlab.com:41320/associapp-db1')
+mongoose.connect(config.db)
 app.io = require('socket.io')()
 
 app.use(express.json())

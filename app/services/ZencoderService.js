@@ -1,8 +1,10 @@
 const axios = require('axios')
-const ENDPOINT = 'https://app.zencoder.com/api/v2'
+const config = require('../../config.json')
+const ENDPOINT = config.zencoder.endpoint
+const APP_DOMAIN = config.api_domain
 
 axios.defaults.headers.post['Content-Type'] = 'application/json'
-axios.defaults.headers.post['Zencoder-Api-Key'] = 'fecbaa90d94d27af5d319d20165b8447'
+axios.defaults.headers.post['Zencoder-Api-Key'] = config.zencoder.secret
 
 module.exports = {
   async createJob ({ input, bucket, key }){
@@ -14,7 +16,7 @@ module.exports = {
           url: `s3://${bucket}/processed_${key}`,
           public: true,
           notifications: [
-            'https://sambatechsb.herokuapp.com/video/job/callback'
+            APP_DOMAIN+'/video/job/callback'
           ]
         }
       ]

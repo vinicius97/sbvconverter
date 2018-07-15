@@ -14,6 +14,7 @@ module.exports = (io) => {
 
   router.post('/job/callback', (req, res, next) => {
     io.emit('upload status', 'Finalizado')
+    console.log(req.body)
     res.end()
   })
 

@@ -1,4 +1,7 @@
 const AWS = require('aws-sdk')
+const awsCredentials = require('../../config.json').aws
+AWS.config.loadFromPath(awsCredentials)
+
 const s3 = new AWS.S3({signatureVersion: 'v2'})
 const multer  = require('multer')
 const multerS3 = require('multer-s3')
