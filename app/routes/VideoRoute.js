@@ -14,10 +14,10 @@ module.exports = (io) => {
 
   router.post('/job/callback', (req, res, next) => {
     const { url } = req.body.job.output
-    const uid = url.split('_')[1]
-    io.emit('upload status '+uid, 'Finalizado')
+    const key = url.split('_')[1]
+    io.emit('upload status '+key, 'Finalizado')
 
-    console.log(url, uid, 'Emitted')
+    console.log(url, key, 'Emitted')
 
     res.end()
   })
@@ -45,10 +45,9 @@ module.exports = (io) => {
 
   router.post('/encode', async (req, res, next) => {
     try{
-      const { _id, bucket, key, uid } = req.body
+      const { _id, bucket, key } = req.body
 
-      io.emit('upload status '+uid, 'Encodando')
-
+      io.emit('upload status '+key, 'Encodando')
       const encodeResult = await VideoController.handleEncode({ bucket, key })
 
       let newParams = {
@@ -56,7 +55,6 @@ module.exports = (io) => {
         output_id : encodeResult.outputs[0].id,
         url       : encodeResult.outputs[0].url,
         status    : 'Encodando',
-        uid       : uid
       }
 
       VideoController.update(_id, newParams)

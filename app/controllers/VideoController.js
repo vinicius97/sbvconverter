@@ -64,17 +64,15 @@ module.exports = {
 
   handleUpload() {
     try{
-      const filename = `${Date.now().toString()}.mp4`
-
       return multer({
         storage: multerS3({
           s3,
           bucket: 'sbtfullstack',
           metadata: (req, file, cb) => {
-            cb(null, { fieldName: filename });
+            cb(null, { fieldName: req.body.key });
           },
           key: (req, file, cb) => {
-            cb(null, filename)
+            cb(null, req.body.key)
           }
         })
       }).single('video')
