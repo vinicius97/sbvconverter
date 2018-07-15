@@ -20,7 +20,7 @@ module.exports = {
         key     : file.key,
         url     : '',
         input   : file.location,
-        status  : ''
+        status  : '',
       }
 
       let video = new VideoModel(params)

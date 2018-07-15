@@ -13,8 +13,12 @@ module.exports = (io) => {
   })
 
   router.post('/job/callback', (req, res, next) => {
-    io.emit('upload status', 'Finalizado')
-    console.log(req.body)
+    const { url } = req.body.job.output
+    const uid = url.split('_')[1]
+    io.emit('upload status '+uid, 'Finalizado')
+
+    console.log(url, uid, 'Emitted')
+
     res.end()
   })
 
@@ -28,7 +32,7 @@ module.exports = (io) => {
   VideoController.handleUpload(),
   async (req, res, next) => {
     try{
-      const title = req.body.title
+      const { title } = req.body
       const file = req.file
 
       const videoObject = await VideoController.create(title, file)
@@ -41,16 +45,18 @@ module.exports = (io) => {
 
   router.post('/encode', async (req, res, next) => {
     try{
+      const { _id, bucket, key, uid } = req.body
 
-      io.emit('upload status', 'Encodando')
-      const { _id, bucket, key } = req.body
+      io.emit('upload status '+uid, 'Encodando')
+
       const encodeResult = await VideoController.handleEncode({ bucket, key })
 
       let newParams = {
         encode_id : encodeResult.id,
         output_id : encodeResult.outputs[0].id,
         url       : encodeResult.outputs[0].url,
-        status    : 'Encodando'
+        status    : 'Encodando',
+        uid       : uid
       }
 
       VideoController.update(_id, newParams)

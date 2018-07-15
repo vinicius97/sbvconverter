@@ -10,7 +10,8 @@ const VideoSchema = new Schema({
   title     : {type: String},
   url       : {type: String},
   input     : {type: String},
-  status    : {type: String, default: 'Enviando'}
+  status    : {type: String, default: 'Enviando'},
+  uid       : {type: String}
 })
 
 module.exports = mongoose.model('VideoModel', VideoSchema)
