@@ -54,12 +54,13 @@ module.exports = (io) => {
 
       VideoController.update(_id, newParams)
 
+      res.send({_id})
+
     }catch (e) {
       console.log('Erro ao tentar encodar')
       console.log(e)
       io.emit('upload status', 'Falha')
-    }finally {
-      res.end()
+      res.send(500)
     }
   })
 
