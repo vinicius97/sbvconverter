@@ -1,5 +1,6 @@
 const express = require('express')
 const VideoController = require('../controllers/VideoController')
+const AWSService = require('../services/AWSS3Service')
 const router = express.Router()
 
 module.exports = (io) => {
@@ -24,31 +25,35 @@ module.exports = (io) => {
 
   router.post('/upload', (req, res, next) => {
     res.setTimeout(24 * 60 * 60000, function(){ // Timeout 1 dia para requisições de uploads
-      console.log('Request has timed out.');
+      console.log('Time out na requisição de upload')
       res.send(408);
     });
     next()
   },
-  VideoController.handleUpload(),
-  async (req, res, next) => {
+  AWSService.upload.single('video'),
+  async (req, res) => {
     try{
-      const { title } = req.body
-      const file = req.file
+      const { title, key } = req.body
+      const video = req.file
 
-      const videoObject = await VideoController.create(title, file)
-      res.send(videoObject)
+      await AWSService.uploadToS3(video, key, async (fileDetails) => {
+        await VideoController.create(title, fileDetails, key, (videoObject) => {
+          res.send(videoObject)
+        })
+      })
+
     }catch (e) {
       console.log(e)
-      res.end()
+      res.send(null).end(500)
     }
   })
 
   router.post('/encode', async (req, res, next) => {
     try{
-      const { _id, bucket, key } = req.body
+      const { _id, bucket, input, key } = req.body
 
       io.emit('upload status '+key, 'Encodando')
-      const encodeResult = await VideoController.handleEncode({ bucket, key })
+      const encodeResult = await VideoController.handleEncode({ bucket, input, key })
 
       let newParams = {
         encode_id : encodeResult.id,

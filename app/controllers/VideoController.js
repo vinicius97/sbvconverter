@@ -1,25 +1,16 @@
-const AWS = require('aws-sdk')
-const awsCredentials = require('../../config.json').aws
-AWS.config.accessKeyId = awsCredentials.accessKeyId
-AWS.config.secretAccessKey = awsCredentials.secretAccessKey
-
-const s3 = new AWS.S3({signatureVersion: 'v2'})
-const multer  = require('multer')
-const multerS3 = require('multer-s3')
-
 const VideoModel = require('../models/VideoModel')
 const { createJob } = require('../services/ZencoderService')
 
 module.exports = {
-  async create(title, file) {
+  async create(title, fileDetails, key, cb) {
     try{
       let params = {
-        bucket  : file.bucket,
+        bucket  : fileDetails.Bucket,
         title   : title,
-        filename: title + file.key,
-        key     : file.key,
+        filename: title + key,
+        key     : key,
         url     : '',
-        input   : file.location,
+        input   : fileDetails.Location,
         status  : '',
       }
 
@@ -29,10 +20,12 @@ module.exports = {
         if (err) {
           console.log('Erro ao salvar parametros do vídeo', err)
           videoObject = null
+        }else{
+          console.log('created video object: ', videoObject)
         }
       })
 
-      return videoObject
+      return cb(videoObject)
 
     }catch (e) {
       return null
@@ -44,8 +37,7 @@ module.exports = {
       id,
       params,
       {new: true},
-      (err, videoObject) => {
-        // Handle any possible database errors
+      (err) => {
         if (err){
           return res.status(500).send(err);
         }
@@ -62,27 +54,7 @@ module.exports = {
     }
   },
 
-  handleUpload() {
-    try{
-      return multer({
-        storage: multerS3({
-          s3,
-          bucket: 'sbtfullstack',
-          metadata: (req, file, cb) => {
-            cb(null, { fieldName: req.body.key });
-          },
-          key: (req, file, cb) => {
-            cb(null, req.body.key)
-          }
-        })
-      }).single('video')
-    }catch (e){
-      console.log(e)
-      return null
-    }
-  },
-  async handleEncode({ bucket, key }) {
-    const input = `https://s3-sa-east-1.amazonaws.com/${bucket}/${key}`
+  async handleEncode({ bucket, input, key }) {
     const jobResult = await createJob({input, bucket, key})
 
     return jobResult.data

@@ -7,13 +7,13 @@ axios.defaults.headers.post['Content-Type'] = 'application/json'
 axios.defaults.headers.post['Zencoder-Api-Key'] = config.zencoder.secret
 
 module.exports = {
-  async createJob ({ input, bucket, key }){
+  async createJob ({ bucket, input, key }){
     const data = {
       input: input,
       outputs: [
         {
           label: 'web',
-          url: `s3://${bucket}/processed_${key}`,
+          url: `s3://${bucket}/processed_${key}.mp4`,
           public: true,
           notifications: [
             APP_DOMAIN+'/video/job/callback'
