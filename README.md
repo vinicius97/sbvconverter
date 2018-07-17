@@ -25,33 +25,46 @@ GET /video/list
 application/json
 ```
 Retorna um array de objetos contendo as informações dos vídeos enviados para a AWS S3
-----
+
+
+
+
 ```
 GET /video/:id
 application/json
 ```
 Retorna o ID os dados de determinado vídeo do banco de dados utilizando o id específico passado como parâmetro no endpoint.
-----
+
+
+
+
 ## POST
 
 ```
 POST /video/job/callback
 application/json
 ```
-Webhook que escuta do Zencoder quando um vídeo foi encodado. Ele emite uma ação para o websocket enviar à aplicação frontend o novo status
-do item que estava em upload para 'Finalizado'.
-----
+Webhook que escuta do Zencoder quando um vídeo foi encodado. Ele emite uma ação para o websocket enviar à aplicação frontend o novo status do item que estava em upload para 'Finalizado'.
+
+
+
+
 ```
 Recebe como parâmetro no body da requisição: file, key, title
 POST /video/upload
 multipart/form-data 
 ```
 Este endpoint é responsável pelo upload dos vídeos, tendo como cabçalho os parâmetros em multipart/form-data 
-----
+
+
+
+
 ```
 Recebe como parâmetro no body da requisição: _id, bucket, input, key
 POST /video/encode
 application/json
 ```
 Este endpoint é responsável por localizar o vídeo passado como parâmetro no repositório do AWS S3 e solicitar o encode para a API do Zencoder
-----
+
+
+
