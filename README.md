@@ -25,7 +25,34 @@ GET /video/list
 application/json
 ```
 Retorna um array de objetos contendo as informações dos vídeos enviados para a AWS S3
-
+````
+[
+  {
+    "status":"",
+    "_id":"",
+    "title":"",
+    "filename":"",
+    "key":"video.mp4",
+    "url":"",
+    "input":"",
+    "__v": 0,
+    "output_id":"",
+    "encode_id":""
+  },
+  {
+    "status":"",
+    "_id":"",
+    "title":"",
+    "filename":"",
+    "key":"video.mp4",
+    "url":"",
+    "input":"",
+    "__v": 0,
+    "output_id":"",
+    "encode_id":""
+  }
+]
+````
 
 
 
@@ -33,8 +60,21 @@ Retorna um array de objetos contendo as informações dos vídeos enviados para 
 GET /video/:id
 application/json
 ```
-Retorna o ID os dados de determinado vídeo do banco de dados utilizando o id específico passado como parâmetro no endpoint.
-
+Retorna os dados de determinado vídeo do banco de dados utilizando o id específico passado como parâmetro no endpoint.
+````
+{
+    "status":"",
+    "_id":"",
+    "title":"",
+    "filename":"",
+    "key":"video.mp4",
+    "url":"",
+    "input":"",
+    "__v": 0,
+    "output_id":"",
+    "encode_id":""
+  },
+````
 
 
 
