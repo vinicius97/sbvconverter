@@ -17,7 +17,8 @@ Para o correto funcionamento da aplicação é necessário configurar o arquivo 
 }
 ````
 Os métodos possíveis para uso desta api são
-#GET
+
+## GET
 
 ```
 GET /video/list
@@ -31,7 +32,7 @@ application/json
 ```
 Retorna o ID os dados de determinado vídeo do banco de dados utilizando o id específico passado como parâmetro no endpoint.
 
-#POST
+## POST
 
 ```
 POST /video/job/callback
