@@ -44,6 +44,7 @@ module.exports = (io) => {
 
     }catch (e) {
       console.log(e)
+      io.emit('upload status '+req.body.key, 'Falha')
       res.send(null).end(500)
     }
   })
@@ -69,7 +70,7 @@ module.exports = (io) => {
     }catch (e) {
       console.log('Erro ao tentar encodar')
       console.log(e)
-      io.emit('upload status', 'Falha')
+      io.emit('upload status '+req.body.key, 'Falha')
       res.send(500)
     }
   })
